@@ -1,26 +1,18 @@
-#include <iostream>
-#include "compresorrle.h"
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
 
-using namespace std;
+int main(int argc, char *argv[])
+{
+    QGuiApplication app(argc, argv);
 
-int main() {
-    CompresorRLE motor;
-    string prueba = "AAABBBCCCDD";
+    QQmlApplicationEngine engine;
+    QObject::connect(
+        &engine,
+        &QQmlApplicationEngine::objectCreationFailed,
+        &app,
+        []() { QCoreApplication::exit(-1); },
+        Qt::QueuedConnection);
+    engine.loadFromModule("LZ78", "Main");
 
-    try {
-        string comp = motor.comprimir(prueba);
-        cout << "Comprimido: " << comp << endl;
-
-        string desc = motor.descomprimir(comp);
-        cout << "Descomprimido: " << desc << endl;
-
-        if (prueba == desc) {
-            cout << "Verificacion exitosa: El texto coincide." << endl;
-        }
-    } catch (const exception& e) {
-
-        cerr << "Error detectado: " << e.what() << endl;
-    }
-
-    return 0;
+    return app.exec();
 }
