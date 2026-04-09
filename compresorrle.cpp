@@ -1,5 +1,6 @@
 #include "compresorrle.h"
-
+#include <iostream>
+#include <cstdlib>
 using namespace std;
 
 CompresorRLE::CompresorRLE() {}
@@ -28,20 +29,21 @@ string CompresorRLE::descomprimir(const string& comprimido) {
     int n = comprimido.length();
 
     for (int i = 0; i < n; i++) {
-        string numStr = "";
+        string numerosStr = "";
 
 
         while (i < n && isdigit(comprimido[i])) {
-            numStr += comprimido[i];
+            numerosStr += comprimido[i];
             i++;
         }
 
-        if (numStr.empty() && i < n) {
-            throw runtime_error("Error: Formato RLE invalido (falta el contador).");
+        if (numerosStr.empty() && i < n) {
+            cout << "Error: Formato RLE invalido (falta el contador)." << endl;
+            exit(1);
         }
 
         if (i < n) {
-            int veces = stoi(numStr);
+            int veces = stoi(numerosStr);
 
             resultado.append(veces, comprimido[i]);
         }
