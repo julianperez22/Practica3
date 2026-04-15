@@ -4,8 +4,12 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
+        compresorlz78.cpp \
         compresorrle.cpp \
+        encriptador.cpp \
         main.cpp
 
 HEADERS += \
-    compresorrle.h
+    compresorlz78.h \
+    compresorrle.h \
+    encriptador.h

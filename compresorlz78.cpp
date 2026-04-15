@@ -1,67 +1,55 @@
 #include "compresorlz78.h"
 #include <iostream>
-#include <string>
-
 using namespace std;
 
-
-CompresorLZ78::CompresorLZ78(int capInicial) {
-    capacidad = capInicial;
-    tamanoActual = 0;
+CompresorLZ78::CompresorLZ78(int cap) : capacidad(cap), tamanoActual(0) {
     diccionario = new EntradaDiccionario[capacidad];
 }
 
+CompresorLZ78::~CompresorLZ78() { delete[] diccionario; }
 
-CompresorLZ78::~CompresorLZ78() {
-    delete[] diccionario;
-}
+void CompresorLZ78::limpiarDiccionario() { tamanoActual = 0; }
 
-
-void CompresorLZ78::limpiarDiccionario() {
-    tamanoActual = 0; //Para borrar lo anterior
-}
-
-
-void CompresorLZ78::comprimir(const string& texto) {
-    int n = texto.length();
-    int indiceActual = 0;
-
-    cout << "Salida " << endl;
-
+int CompresorLZ78::comprimir(const string& texto, int* indices, char* caracteres) {
+    int n = texto.length(), indiceActual = 0, pares = 0;
+    cout << "Compresion: ";
     for (int i = 0; i < n; i++) {
         char car = texto[i];
-        int encontradoEn = -1;
-
-
+        int encontrado = -1;
         for (int j = 0; j < tamanoActual; j++) {
             if (diccionario[j].prefijo == indiceActual && diccionario[j].nuevo == car) {
-                encontradoEn = j + 1;
-                break;
+                encontrado = j + 1; break;
             }
         }
-
-        if (encontradoEn != -1) {
-
-            indiceActual = encontradoEn;
-        } else {
-
-            cout << "(" << indiceActual << ", '" << car << "') ";
-
-
+        if (encontrado != -1) { indiceActual = encontrado; }
+        else {
+            indices[pares] = indiceActual; caracteres[pares] = car;
+            cout << "(" << indices[pares] << ", '" << caracteres[pares] << "') ";
             if (tamanoActual < capacidad) {
                 diccionario[tamanoActual].prefijo = indiceActual;
                 diccionario[tamanoActual].nuevo = car;
                 tamanoActual++;
             }
-
-
-            indiceActual = 0;
+            indiceActual = 0; pares++;
         }
     }
+    cout << endl; return pares;
+}
 
-
-    if (indiceActual != 0) {
-        cout << "(" << indiceActual << ", ' ')";
+string CompresorLZ78::descomprimir(int* indices, char* caracteres, int numPares) {
+    string resultado = ""; limpiarDiccionario();
+    for (int i = 0; i < numPares; i++) {
+        string frase = ""; int tempIdx = indices[i];
+        while (tempIdx > 0) {
+            frase = diccionario[tempIdx - 1].nuevo + frase;
+            tempIdx = diccionario[tempIdx - 1].prefijo;
+        }
+        frase += caracteres[i]; resultado += frase;
+        if (tamanoActual < capacidad) {
+            diccionario[tamanoActual].prefijo = indices[i];
+            diccionario[tamanoActual].nuevo = caracteres[i];
+            tamanoActual++;
+        }
     }
-
+    return resultado;
 }

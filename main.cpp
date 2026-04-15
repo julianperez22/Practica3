@@ -1,61 +1,99 @@
 #include <iostream>
 #include <string>
+#include <limits>
 #include "compresorrle.h"
+#include "compresorlz78.h"
+#include "encriptador.h"
 
 using namespace std;
 
+void limpiarBuffer() {
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+}
+
 int main() {
-    CompresorRLE motor;
+    CompresorRLE motorRLE;
+    CompresorLZ78 motorLZ78(500);
+
     string textoUsuario = "";
-    string resultado = "";
-    int opcion = 0;
-    int metodo = 0;
+    string resultadoRLE = "";
+    int indicesLZ78[500];
+    char caracteresLZ78[500];
+    int numParesLZ78 = 0;
 
-    cout << "Seleccione el metodo (RLE 1 - LZ78 2) " << endl;
+    int n_rot, k_in;
+    unsigned char claveK;
+    int metodo = 0, opcion = 0;
+
+
+    cout << "Parte para encriptacion" << endl;
+    cout << "Rotacion n: "; cin >> n_rot;
+    cout << "Clave K: "; cin >> k_in;
+    claveK = (unsigned char)k_in;
+    limpiarBuffer();
+
+    cout << "\nMetodo (1. RLE - 2. LZ78): ";
     cin >> metodo;
+    limpiarBuffer();
 
-    if (metodo == 1){
+    if (metodo == 1) {
         while (opcion != 4) {
-
-            cout << "1. Ingresar Texto\n2. Comprimir\n3. Descomprimir\n4. Salir" << endl;
-            cout << "Opcion: ";
-            cin >> opcion;
-            cin.ignore();
+            cout << "\n RLE \n1. Poner Texto\n2. Comprimir\n3. Descomprimir\n4. Salir\nOpcion: ";
+            cin >> opcion; limpiarBuffer();
 
             if (opcion == 1) {
-                cout << "Ingrese texto: ";
-                cin >> textoUsuario;
+                cout << "Texto: "; getline(cin, textoUsuario);
             }
             else if (opcion == 2) {
+                if (!textoUsuario.empty()) {
 
-                if (textoUsuario.length() > 0) {
-                    resultado = motor.comprimir(textoUsuario);
-                    cout << "Resultado: " << resultado << endl;
-                } else {
-                    cout << "Error: El texto esta vacio." << endl;
+                    resultadoRLE = motorRLE.comprimir(textoUsuario);
+                    cout << "Resultado Comprimido: " << resultadoRLE << endl;
+
+
+                    Encriptador::procesar(resultadoRLE, n_rot, claveK, true);
                 }
             }
             else if (opcion == 3) {
-
-                bool formatoValido = true;
-                if (resultado.length() == 0) {
-                    formatoValido = false;
-                }
-
-                if (formatoValido) {
-
-                    string recuperado = motor.descomprimir(resultado);
-                    cout << "Recuperado: " << recuperado << endl;
-                } else {
-                    cout << "Error: No hay nada que descomprimir." << endl;
+                if (!resultadoRLE.empty()) {
+                    string temp = resultadoRLE;
+                    Encriptador::procesar(temp, n_rot, claveK, false);
+                    cout << "Texto Original: " << motorRLE.descomprimir(temp) << endl;
                 }
             }
         }
-        return 0;
     }
+    else if (metodo == 2) {
+        opcion = 0;
+        while (opcion != 4) {
+            cout << "\n LZ78 \n1. Poner Texto\n2. Comprimir\n3. Descomprimir\n4. Salir\nOpcion: ";
+            cin >> opcion; limpiarBuffer();
 
+            if (opcion == 1) {
+                cout << "Texto: "; getline(cin, textoUsuario);
+            }
+            else if (opcion == 2) {
+                if (!textoUsuario.empty()) {
+                    motorLZ78.limpiarDiccionario();
+                    numParesLZ78 = motorLZ78.comprimir(textoUsuario, indicesLZ78, caracteresLZ78);
+
+
+                    string temp(caracteresLZ78, numParesLZ78);
+                    Encriptador::procesar(temp, n_rot, claveK, true);
+                    for(int i=0; i<numParesLZ78; i++) caracteresLZ78[i] = temp[i];
+                }
+            }
+            else if (opcion == 3) {
+                if (numParesLZ78 > 0) {
+                    string temp(caracteresLZ78, numParesLZ78);
+                    Encriptador::procesar(temp, n_rot, claveK, false);
+                    for(int i=0; i<numParesLZ78; i++) caracteresLZ78[i] = temp[i];
+
+                    cout << "Texto Original: " << motorLZ78.descomprimir(indicesLZ78, caracteresLZ78, numParesLZ78) << endl;
+                }
+            }
+        }
+    }
+    return 0;
 }
-
-
-
-
