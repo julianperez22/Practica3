@@ -2,16 +2,12 @@
 #define COMPRESORRLE_H
 
 #include <string>
-#include <stdexcept>
-
 
 class CompresorRLE {
 public:
-    CompresorRLE(); //
-
-
-    std::string comprimir(const std::string& texto);
-    std::string descomprimir(const std::string& comprimido);
+    CompresorRLE();
+    std::string comprimir(std::string texto);
+    std::string descomprimir(std::string texto);
 };
 
-#endif // COMPRESORRLE_H
+#endif

@@ -5,38 +5,50 @@ using namespace std;
 
 CompresorRLE::CompresorRLE() {}
 
-string CompresorRLE::comprimir(const string& texto) {
+
+string CompresorRLE::comprimir(string texto) {
     if (texto.empty()) return "";
     string resultado = "";
-    int n = texto.length();
+    size_t n = texto.length();
 
-    for (int i = 0; i < n; i++) {
-        int conteo = 1;
-
-        while (i + 1 < n && texto[i] == texto[i + 1]) {
-            conteo++;
+    for (size_t i = 0; i < n; i++) {
+        int contador = 1;
+        while (i < n - 1 && texto[i] == texto[i + 1]) {
+            contador++;
             i++;
         }
 
-        resultado += to_string(conteo) + texto[i];
+        resultado += to_string(contador) + "\"" + texto[i] + "\"";
     }
     return resultado;
 }
 
-string CompresorRLE::descomprimir(const string& comprimido) {
+
+string CompresorRLE::descomprimir(string texto) {
+    if (texto.empty()) return "";
+
     string resultado = "";
-    int n = comprimido.length();
+    string numStr = "";
 
-    for (int i = 0; i < n; i++) {
-        string numStr = "";
+    for (size_t i = 0; i < texto.length(); i++) {
 
-        while (i < n && isdigit(comprimido[i])) {
-            numStr += comprimido[i];
-            i++;
+        if (texto[i] == '\"') {
+
+            if (i + 1 < texto.length()) {
+                char dato = texto[i + 1];
+                int cantidad = stoi(numStr);
+
+                for (int j = 0; j < cantidad; j++) {
+                    resultado += dato;
+                }
+
+                numStr = "";
+                i += 2;
+            }
         }
-        if (i < n && !numStr.empty()) {
-            int veces = stoi(numStr);
-            resultado.append(veces, comprimido[i]);
+
+        else if (isdigit(texto[i])) {
+            numStr += texto[i];
         }
     }
     return resultado;
